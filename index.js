@@ -119,8 +119,6 @@
 //   console.log(`WebSocket server running on port ${PORT}`);
 // });
 
-
-
 const express = require("express");
 require("dotenv").config();
 
@@ -166,9 +164,7 @@ server.on("upgrade", async (req, socket, head) => {
       throw new Error("Missing Firebase token");
     }
 
-    const decodedToken = await admin
-      .auth()
-      .verifyIdToken(token);
+    const decodedToken = await admin.auth().verifyIdToken(token);
 
     if (socket.destroyed) return;
 
@@ -198,6 +194,19 @@ wss.on("connection", (ws) => {
 
   clients.get(ws.userId).add(ws);
 
+  ws.on("message", (raw) => {
+    let msg;
+    try {
+      msg = JSON.parse(raw.toString());
+    } catch {
+      return; // ignore non-JSON messages
+    }
+
+    if (msg.type === "ping") {
+      ws.send(JSON.stringify({ type: "pong" }));
+    }
+  });
+
   ws.on("close", () => {
     const userSockets = clients.get(ws.userId);
 
@@ -223,10 +232,7 @@ app.post("/notify", (req, res) => {
     });
   }
 
-  if (
-    req.headers["x-internal-secret"] !==
-    process.env.INTERNAL_SECRET
-  ) {
+  if (req.headers["x-internal-secret"] !== process.env.INTERNAL_SECRET) {
     return res.status(401).json({
       error: "Unauthorized",
     });
