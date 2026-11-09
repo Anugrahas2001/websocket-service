@@ -12,20 +12,31 @@
 
 // module.exports = admin;
 
+// const admin = require("firebase-admin");
+// const fs = require("fs");
+// const path = require("path");
+
+// require("dotenv").config();
+
+// const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+// const serviceAccount = JSON.parse(
+//   fs.readFileSync(path.resolve(__dirname, serviceAccountPath), "utf8")
+// );
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
+
+// module.exports = admin;
+
+
 const admin = require("firebase-admin");
 const fs = require("fs");
-const path = require("path");
 
-require("dotenv").config();
-
-const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT;
-
-const serviceAccount = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, serviceAccountPath), "utf8")
+const creds = JSON.parse(
+  fs.readFileSync("/etc/secrets/serviceAccount.json", "utf8")
 );
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
+admin.initializeApp({ credential: admin.credential.cert(creds) });
 module.exports = admin;
